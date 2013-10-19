@@ -15,17 +15,10 @@ class Carnivore
       attr_accessor :timer
       attr_accessor :credentials
 
-      def initialize(args={})
+      def setup(args={})
         @username = args[:username]
-        super
-      end
-
-      def setup
-        if(Carnivore::Config.get(:github, :username))
-          @username = Carnivore::Config.get(:github, :username)
-        end
-        @base_url = Carnivore::Config.get(:github, :api_url)
-        @credentials = Carnivore::Config.get(:github, :credentials)
+        @base_url = args[:api_url] || 'https://api.github.com'
+        @credentials = args[:credentials]
         @poll = 60
         @timer = Timers.new
       end
@@ -33,7 +26,11 @@ class Carnivore
       protected
 
       def url(path)
-        File.join(base_url, path)
+        if(username)
+          File.join(base_url, "users/#{username}", path)
+        else
+          File.join(base_url, path)
+        end
       end
 
       def update_settings(response)
