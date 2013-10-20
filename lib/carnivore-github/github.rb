@@ -20,7 +20,6 @@ module Carnivore
         @base_url = args[:api_url] || 'https://api.github.com'
         @credentials = args[:credentials]
         @poll = 60
-        @timer = Timers.new
       end
 
       protected
