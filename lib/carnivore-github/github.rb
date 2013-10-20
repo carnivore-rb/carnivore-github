@@ -3,7 +3,7 @@ require 'timers'
 require 'http'
 require 'json'
 
-class Carnivore
+module Carnivore
   class Source
     class Github < Source
 
@@ -26,16 +26,19 @@ class Carnivore
       protected
 
       def url(path)
-        if(username)
-          File.join(base_url, "users/#{username}", path)
-        else
-          File.join(base_url, path)
-        end
+        File.join(base_url, path)
       end
 
       def update_settings(response)
-        @etag = init.headers['Etag'] if init.headers['Etag']
-        @poll = init.headers['X-Poll-Interval'] if init.headers['X-Poll-Interval']
+        @etag = response.headers['Etag'] if response.headers['Etag']
+        @poll = response.headers['X-Poll-Interval'] if response.headers['X-Poll-Interval']
+        @poll = @poll.to_i
+        # Never drop below minute polling
+        if(@poll < 60)
+          @poll = 60
+        end
+        debug "Current Etag value: #{etag}"
+        debug "Current polling value: #{poll}"
       end
 
       def fetch(url, restrict=true)
